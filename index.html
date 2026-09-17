@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIAGA - UPTD Puskesmas Mompang</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,10 +11,11 @@
 <body class="bg-gray-100 min-h-screen text-gray-800 bg-cover bg-center bg-fixed" id="webBody">
 
   <script>
-    var PUBLIC_ASSET_ID = "<?= assetIdParam ?>";
+    // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
+    const API_URL = "URL_WEB_APP_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI";
   </script>
 
-  <!-- MODAL PUBLIC DETAIL (AKSES SCAN KAMERA HP LANGSUNG) -->
+  <!-- MODAL PUBLIC DETAIL -->
   <div id="publicDetailModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center border border-teal-500">
       <div id="publicModalContent">
@@ -41,14 +43,13 @@
           <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Password</label>
           <input type="password" id="password" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none">
         </div>
-        <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg transition duration-200 shadow-lg">MASUK SISTEM ADMIN</button>
+        <button type="submit" id="btnLogin" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg transition duration-200 shadow-lg">MASUK SISTEM ADMIN</button>
       </form>
     </div>
   </div>
 
   <!-- MAIN APP SECTION -->
   <div id="appSection" class="hidden min-h-screen flex flex-col">
-    <!-- Navbar -->
     <nav class="bg-teal-700 text-white shadow-md">
       <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center space-x-3">
@@ -62,7 +63,6 @@
       </div>
     </nav>
 
-    <!-- Navigation Tabs -->
     <div class="bg-white shadow-sm border-b overflow-x-auto">
       <div class="max-w-7xl mx-auto flex">
         <button onclick="switchTab('tabAset')" class="tab-btn active border-b-2 border-teal-600 px-6 py-3 font-semibold text-teal-700 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> Daftar Aset</button>
@@ -72,7 +72,6 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto p-4 flex-1 w-full">
       
       <!-- TAB 1: DAFTAR ASET -->
@@ -92,9 +91,7 @@
                 <th class="p-3 text-xs font-bold uppercase text-gray-600">Link Publik</th>
               </tr>
             </thead>
-            <tbody id="assetTableBody">
-              <!-- Render via JS -->
-            </tbody>
+            <tbody id="assetTableBody"></tbody>
           </table>
         </div>
       </section>
@@ -130,12 +127,11 @@
             <button type="submit" id="btnSaveAsset" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg shadow">Simpan & Generate QR Code</button>
           </form>
 
-          <!-- Modal Tampil QR Pasca Entry -->
           <div id="newQrResult" class="mt-6 p-4 border border-teal-300 rounded-xl bg-teal-50 text-center hidden">
             <h3 class="font-bold text-teal-800 mb-2">QR Code Berhasil Dihasilkan!</h3>
             <img id="newQrImg" src="" class="h-44 w-44 mx-auto border-2 border-white rounded-lg shadow mb-2">
-            <p class="text-xs text-gray-600 mb-3">Scan QR di atas menggunakan Kamera HP biasa untuk langsung mengarahkan ke detail aset secara publik.</p>
-            <a id="newQrLink" href="#" target="_blank" class="inline-block bg-teal-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Buka File Detail Aset</a>
+            <p class="text-xs text-gray-600 mb-3">Scan QR di atas menggunakan Kamera HP biasa untuk melihat detail aset.</p>
+            <a id="newQrLink" href="#" target="_blank" class="inline-block bg-teal-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Buka Detail Aset</a>
           </div>
         </div>
       </section>
@@ -149,80 +145,70 @@
         </div>
       </section>
 
-      <!-- TAB 4: KONFIGURASI UI, LOGO & KOP SURAT -->
+      <!-- TAB 4: CONFIG -->
       <section id="tabSetting" class="tab-content hidden max-w-2xl mx-auto">
         <div class="bg-white p-6 rounded-xl shadow space-y-6">
-          <h2 class="text-xl font-bold text-gray-700 border-b pb-2"><i class="fa-solid fa-sliders text-teal-600 mr-2"></i> Pengaturan UI & Upload Gambar Drive</h2>
+          <h2 class="text-xl font-bold text-gray-700 border-b pb-2"><i class="fa-solid fa-sliders text-teal-600 mr-2"></i> Pengaturan UI & Kop</h2>
           
-          <!-- Upload Gambar -->
           <div class="space-y-4">
-            <h3 class="font-semibold text-sm text-teal-700 uppercase">1. Upload Foto / Media ke Google Drive</h3>
-            
+            <h3 class="font-semibold text-sm text-teal-700 uppercase">1. Upload Gambar ke Drive</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <!-- Upload Logo Kop -->
               <div class="p-3 border rounded-xl text-center bg-gray-50">
                 <p class="text-xs font-bold mb-2">Logo Kop Surat</p>
                 <input type="file" id="fileLogoKop" accept="image/*" class="hidden" onchange="uploadMedia('fileLogoKop', 'cfgLogoKop', 'previewKop')">
-                <button onclick="document.getElementById('fileLogoKop').click()" class="bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold mb-2 w-full"><i class="fa-solid fa-upload"></i> Upload</button>
+                <button onclick="document.getElementById('fileLogoKop').click()" class="bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold mb-2 w-full">Upload</button>
                 <img id="previewKop" class="h-16 mx-auto border object-contain bg-white rounded p-1">
                 <input type="hidden" id="cfgLogoKop">
               </div>
 
-              <!-- Upload Logo SIAGA -->
               <div class="p-3 border rounded-xl text-center bg-gray-50">
                 <p class="text-xs font-bold mb-2">Logo SIAGA</p>
                 <input type="file" id="fileLogoSIAGA" accept="image/*" class="hidden" onchange="uploadMedia('fileLogoSIAGA', 'cfgLogoSIAGA', 'previewSIAGA')">
-                <button onclick="document.getElementById('fileLogoSIAGA').click()" class="bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold mb-2 w-full"><i class="fa-solid fa-upload"></i> Upload</button>
+                <button onclick="document.getElementById('fileLogoSIAGA').click()" class="bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold mb-2 w-full">Upload</button>
                 <img id="previewSIAGA" class="h-16 mx-auto border object-contain bg-white rounded p-1">
                 <input type="hidden" id="cfgLogoSIAGA">
               </div>
 
-              <!-- Upload Background -->
               <div class="p-3 border rounded-xl text-center bg-gray-50">
                 <p class="text-xs font-bold mb-2">Background Web</p>
                 <input type="file" id="fileBgWeb" accept="image/*" class="hidden" onchange="uploadMedia('fileBgWeb', 'cfgBgWeb', 'previewBg')">
-                <button onclick="document.getElementById('fileBgWeb').click()" class="bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold mb-2 w-full"><i class="fa-solid fa-upload"></i> Upload</button>
+                <button onclick="document.getElementById('fileBgWeb').click()" class="bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold mb-2 w-full">Upload</button>
                 <img id="previewBg" class="h-16 mx-auto border object-cover bg-white rounded p-1 w-full">
                 <input type="hidden" id="cfgBgWeb">
               </div>
             </div>
           </div>
 
-          <!-- Kop Surat Text -->
           <div class="space-y-4 border-t pt-4">
             <h3 class="font-semibold text-sm text-teal-700 uppercase">2. Teks Kop Surat Laporan PDF</h3>
-            <div>
-              <label class="block text-xs font-semibold mb-1">Baris 1 (Pemerintah)</label>
-              <input type="text" id="cfgKop1" class="w-full border px-3 py-2 rounded text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold mb-1">Baris 2 (Dinas)</label>
-              <input type="text" id="cfgKop2" class="w-full border px-3 py-2 rounded text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold mb-1">Nama Puskesmas</label>
-              <input type="text" id="cfgPuskesmas" class="w-full border px-3 py-2 rounded text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold mb-1">Alamat Lengkap</label>
-              <textarea id="cfgAlamat" class="w-full border px-3 py-2 rounded text-sm" rows="2"></textarea>
-            </div>
+            <div><label class="block text-xs font-semibold mb-1">Baris 1</label><input type="text" id="cfgKop1" class="w-full border px-3 py-2 rounded text-sm"></div>
+            <div><label class="block text-xs font-semibold mb-1">Baris 2</label><input type="text" id="cfgKop2" class="w-full border px-3 py-2 rounded text-sm"></div>
+            <div><label class="block text-xs font-semibold mb-1">Nama Puskesmas</label><input type="text" id="cfgPuskesmas" class="w-full border px-3 py-2 rounded text-sm"></div>
+            <div><label class="block text-xs font-semibold mb-1">Alamat</label><textarea id="cfgAlamat" class="w-full border px-3 py-2 rounded text-sm" rows="2"></textarea></div>
           </div>
 
-          <button onclick="handleConfigSubmit()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg shadow">Simpan Semua Konfigurasi</button>
+          <button onclick="handleConfigSubmit()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg shadow">Simpan Konfigurasi</button>
         </div>
       </section>
-
     </main>
   </div>
 
   <script>
     let html5QrcodeScanner = null;
 
+    // AMBIL PARAMETER SCRIPT DARI URL (UNTUK SCAN KAMERA HP)
     window.onload = function() {
-      if (PUBLIC_ASSET_ID && PUBLIC_ASSET_ID !== "null" && PUBLIC_ASSET_ID !== "") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const assetId = urlParams.get('id');
+
+      if (assetId) {
         document.getElementById('publicDetailModal').classList.remove('hidden');
-        google.script.run.withSuccessHandler(showPublicAssetModal).getAssetById(PUBLIC_ASSET_ID);
+        fetch(`${API_URL}?action=getAssetById&id=${assetId}`)
+          .then(res => res.json())
+          .then(showPublicAssetModal)
+          .catch(() => {
+            document.getElementById('publicModalContent').innerHTML = `<p class="text-red-500 font-bold">Gagal terhubung ke database server.</p>`;
+          });
       }
     };
 
@@ -235,7 +221,6 @@
             <span class="inline-block px-3 py-1 text-xs font-bold rounded-full bg-teal-100 text-teal-800 mb-2">${a.id}</span>
             <h2 class="text-xl font-bold text-gray-800 mb-1">${a.nama}</h2>
             <p class="text-xs text-gray-500 mb-4">Kategori: ${a.kategori}</p>
-            
             <div class="bg-gray-50 p-4 rounded-xl text-left text-sm space-y-2 border">
               <div><span class="font-semibold text-gray-600">Lokasi Ruangan:</span> ${a.ruangan}</div>
               <div><span class="font-semibold text-gray-600">Kondisi Aset:</span> <b>${a.kondisi}</b></div>
@@ -256,9 +241,18 @@
 
     function handleLogin(e) {
       e.preventDefault();
-      let u = document.getElementById('username').value;
-      let p = document.getElementById('password').value;
-      google.script.run.withSuccessHandler(res => {
+      document.getElementById('btnLogin').innerText = 'Memeriksa...';
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'login',
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById('btnLogin').innerText = 'MASUK SISTEM ADMIN';
         if (res.success) {
           document.getElementById('loginSection').classList.add('hidden');
           document.getElementById('appSection').classList.remove('hidden');
@@ -267,7 +261,7 @@
         } else {
           alert(res.message);
         }
-      }).checkLogin(u, p);
+      });
     }
 
     function logout() {
@@ -295,42 +289,50 @@
       let reader = new FileReader();
       
       reader.onload = function(e) {
-        google.script.run.withSuccessHandler(res => {
+        fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'uploadFile',
+            base64Data: e.target.result,
+            fileName: file.name
+          })
+        })
+        .then(res => res.json())
+        .then(res => {
           if(res.success) {
             document.getElementById(hiddenId).value = res.url;
             document.getElementById(previewId).src = res.url;
             alert('Upload Berhasil ke Google Drive!');
-          } else {
-            alert('Upload gagal: ' + res.message);
           }
-        }).uploadFileToDrive(e.target.result, file.name);
+        });
       };
       reader.readAsDataURL(file);
     }
 
     function loadConfig() {
-      google.script.run.withSuccessHandler(cfg => {
-        if(cfg.BgWeb) document.getElementById('webBody').style.backgroundImage = `url('${cfg.BgWeb}')`;
-        if(cfg.LogoSIAGA) {
-          document.getElementById('navLogo').src = cfg.LogoSIAGA;
-          document.getElementById('navLogo').classList.remove('hidden');
-          document.getElementById('previewSIAGA').src = cfg.LogoSIAGA;
-          document.getElementById('cfgLogoSIAGA').value = cfg.LogoSIAGA;
-        }
-        if(cfg.LogoKop) {
-          document.getElementById('previewKop').src = cfg.LogoKop;
-          document.getElementById('cfgLogoKop').value = cfg.LogoKop;
-        }
-        if(cfg.BgWeb) {
-          document.getElementById('previewBg').src = cfg.BgWeb;
-          document.getElementById('cfgBgWeb').value = cfg.BgWeb;
-        }
-
-        document.getElementById('cfgKop1').value = cfg.KopHeader1 || '';
-        document.getElementById('cfgKop2').value = cfg.KopHeader2 || '';
-        document.getElementById('cfgPuskesmas').value = cfg.NamaPuskesmas || '';
-        document.getElementById('cfgAlamat').value = cfg.Alamat || '';
-      }).getConfig();
+      fetch(`${API_URL}?action=getConfig`)
+        .then(res => res.json())
+        .then(cfg => {
+          if(cfg.BgWeb) document.getElementById('webBody').style.backgroundImage = `url('${cfg.BgWeb}')`;
+          if(cfg.LogoSIAGA) {
+            document.getElementById('navLogo').src = cfg.LogoSIAGA;
+            document.getElementById('navLogo').classList.remove('hidden');
+            document.getElementById('previewSIAGA').src = cfg.LogoSIAGA;
+            document.getElementById('cfgLogoSIAGA').value = cfg.LogoSIAGA;
+          }
+          if(cfg.LogoKop) {
+            document.getElementById('previewKop').src = cfg.LogoKop;
+            document.getElementById('cfgLogoKop').value = cfg.LogoKop;
+          }
+          if(cfg.BgWeb) {
+            document.getElementById('previewBg').src = cfg.BgWeb;
+            document.getElementById('cfgBgWeb').value = cfg.BgWeb;
+          }
+          document.getElementById('cfgKop1').value = cfg.KopHeader1 || '';
+          document.getElementById('cfgKop2').value = cfg.KopHeader2 || '';
+          document.getElementById('cfgPuskesmas').value = cfg.NamaPuskesmas || '';
+          document.getElementById('cfgAlamat').value = cfg.Alamat || '';
+        });
     }
 
     function handleConfigSubmit() {
@@ -343,25 +345,33 @@
         NamaPuskesmas: document.getElementById('cfgPuskesmas').value,
         Alamat: document.getElementById('cfgAlamat').value
       };
-      google.script.run.withSuccessHandler(() => {
-        alert('Semua Konfigurasi Berhasil Disimpan!');
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveConfig', config: cfg })
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert('Konfigurasi Berhasil Disimpan!');
         loadConfig();
-      }).saveConfig(cfg);
+      });
     }
 
     function loadAssets() {
-      google.script.run.withSuccessHandler(assets => {
-        let tbody = document.getElementById('assetTableBody');
-        tbody.innerHTML = assets.map(a => `
-          <tr class="border-b hover:bg-slate-50 text-sm">
-            <td class="p-3"><img src="${a.qrUrl}" class="h-14 w-14 border rounded shadow-sm"></td>
-            <td class="p-3"><b>${a.nama}</b><br><span class="text-xs text-gray-400">${a.id}</span></td>
-            <td class="p-3">${a.kategori}<br><span class="text-xs text-teal-700">${a.ruangan}</span></td>
-            <td class="p-3">${getKondisiBadge(a.kondisi)}</td>
-            <td class="p-3"><a href="${a.publicUrl}" target="_blank" class="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded border border-teal-200 font-bold hover:bg-teal-100">Pratinjau File</a></td>
-          </tr>
-        `).join('');
-      }).getAssets();
+      fetch(`${API_URL}?action=getAssets`)
+        .then(res => res.json())
+        .then(assets => {
+          let tbody = document.getElementById('assetTableBody');
+          tbody.innerHTML = assets.map(a => `
+            <tr class="border-b hover:bg-slate-50 text-sm">
+              <td class="p-3"><img src="${a.qrUrl}" class="h-14 w-14 border rounded shadow-sm"></td>
+              <td class="p-3"><b>${a.nama}</b><br><span class="text-xs text-gray-400">${a.id}</span></td>
+              <td class="p-3">${a.kategori}<br><span class="text-xs text-teal-700">${a.ruangan}</span></td>
+              <td class="p-3">${getKondisiBadge(a.kondisi)}</td>
+              <td class="p-3"><a href="${a.publicUrl}" target="_blank" class="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded border border-teal-200 font-bold hover:bg-teal-100">Pratinjau File</a></td>
+            </tr>
+          `).join('');
+        });
     }
 
     function getKondisiBadge(kondisi) {
@@ -377,19 +387,28 @@
     function handleAssetSubmit(e) {
       e.preventDefault();
       document.getElementById('btnSaveAsset').innerText = 'Menyimpan & Membuat QR...';
+      
       let data = {
+        action: 'addAsset',
+        githubUrl: window.location.href.split('?')[0],
         nama: document.getElementById('namaAset').value,
         kategori: document.getElementById('kategoriAset').value,
         ruangan: document.getElementById('ruanganAset').value,
         kondisi: document.getElementById('kondisiAset').value
       };
-      google.script.run.withSuccessHandler(res => {
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(res => {
         document.getElementById('btnSaveAsset').innerText = 'Simpan & Generate QR Code';
         document.getElementById('newQrImg').src = res.qrUrl;
         document.getElementById('newQrLink').href = res.publicAssetUrl;
         document.getElementById('newQrResult').classList.remove('hidden');
         loadAssets();
-      }).addAsset(data);
+      });
     }
 
     function startScanner() {
@@ -402,9 +421,14 @@
 
     function exportPDF() {
       alert('Sedang membuat PDF Laporan dan menyimpan ke Google Drive...');
-      google.script.run.withSuccessHandler(res => {
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'exportPDF' })
+      })
+      .then(res => res.json())
+      .then(res => {
         window.open(res.viewUrl, '_blank');
-      }).exportPDFReport();
+      });
     }
   </script>
 </body>
